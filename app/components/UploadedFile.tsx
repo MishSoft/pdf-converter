@@ -6,11 +6,12 @@ interface FileProps {
 }
 
 export default function UploadedFile({ file, name }: FileProps) {
-  console.log(name);
   return (
     <div className="w-[50%] p-5 bg-[#1D2B3F] rounded-md flex flex-col gap-5">
       <img className="" src={file} alt="" />
-      <span className="text-white text-center mt-5">{name?.name}</span>
+      <span className="text-white text-center mt-5">
+        {name?.name || "No file name"}
+      </span>
     </div>
   );
 }
