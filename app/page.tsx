@@ -5,6 +5,7 @@ import UploadedFile from "./components/UploadedFile";
 import { createWorker } from "tesseract.js";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
+import ErrorPopUp from "./components/ErrorPopUp";
 
 export default function Home() {
   const [fileResponse, setFileResponse] = useState<string | undefined>("");
@@ -12,12 +13,21 @@ export default function Home() {
   const [language, setLanguage] = useState<string>("eng");
   const [isActiveLang, setIsActiveLang] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
 
   const getFileHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      setIsFile(file);
-      setFileResponse(URL.createObjectURL(file));
+      const validImageTypes = ["image/jpg", "image/jpeg", "image/png"];
+      if (validImageTypes.includes(file.type)) {
+        setIsFile(file);
+        setFileResponse(URL.createObjectURL(file));
+      } else {
+        setIsError(true);
+        setTimeout(() => {
+          setIsError(false);
+        }, 3000); // Reset error state after 3 seconds
+      }
     }
   };
 
@@ -60,6 +70,7 @@ export default function Home() {
 
       const blob = await Packer.toBlob(doc);
       saveAs(blob, "example.docx");
+      console.log(typeof doc);
     } catch (error) {
       console.error("Error processing document:", error);
     } finally {
@@ -71,7 +82,6 @@ export default function Home() {
     return () => {
       if (isFile && fileResponse) {
         URL.revokeObjectURL(fileResponse);
-        console.log(fileResponse);
       }
     };
   }, [isFile, fileResponse]);
@@ -103,6 +113,7 @@ export default function Home() {
           )}
         </button>
       )}
+      {isError && <ErrorPopUp setCloseErrorWindow={() => setIsError(false)} />}
     </main>
   );
 }
